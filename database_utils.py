@@ -31,5 +31,6 @@ class DatabaseConnector:
 connector = DatabaseConnector()
 creds = connector.read_db_creds()
 engine = connector.init_db_engine(creds)
-tables_list = connector.list_db_tables(engine)
-print(tables_list)
+list_of_tables = connector.list_db_tables(engine)
+print(list_of_tables)
+

@@ -68,3 +68,4 @@ compose.yml
 .env
 
 test*
+__pycache__
