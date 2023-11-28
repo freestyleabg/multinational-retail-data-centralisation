@@ -13,14 +13,9 @@ class DataExtractor:
         engine = instance.init_db_engine(creds)
         with engine.connect() as conn:
             rds_table = pd.read_sql_table(table, conn)
-            return print(rds_table)
+            return rds_table
 
 trial = du.DatabaseConnector()
 extractor = DataExtractor()
-extractor.read_rds_table(trial, 'legacy_users')
-
-# connector = DatabaseConnector()
-# creds = connector.read_db_creds()
-# engine = connector.init_db_engine(creds)
-# tables_list = connector.list_db_tables(engine)
-# print(tables_list
+df = extractor.read_rds_table(trial, 'legacy_users')
+print(df)
