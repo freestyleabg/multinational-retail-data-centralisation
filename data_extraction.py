@@ -30,3 +30,5 @@ creds1 = connector1.read_db_creds('db_creds_local.yaml')
 engine = connector1.init_db_engine(creds1)
 connector1.upload_to_db(df, 'sales_data')
 # %%
+
+#Dont edit till you add comments!
