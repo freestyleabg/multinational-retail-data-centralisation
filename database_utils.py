@@ -6,8 +6,8 @@ class DatabaseConnector:
     def __init__(self):
         pass
 
-    def read_db_creds(self):
-        with open('db_creds.yaml', 'r') as f:
+    def read_db_creds(self, yaml_file):
+        with open(yaml_file, 'r') as f:
             data_loaded = yaml.safe_load(f)
         return data_loaded
     
@@ -19,22 +19,21 @@ class DatabaseConnector:
         PASSWORD = creds['RDS_PASSWORD']
         DATABASE = creds['RDS_DATABASE']
         PORT = 5432
-        engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
-        return engine
+        self.engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
+        return self.engine
 
     def list_db_tables(self, engine):
-        with engine.connect() as conn:
+        with self.engine.connect() as conn:
             inspector = inspect(conn)
             return inspector.get_table_names()
     
     def upload_to_db(self, df, table_name):
-        with engine.connect() as conn:
+        with self.engine.connect() as conn:
             df.to_sql(table_name, conn)
 
 
 connector = DatabaseConnector()
-creds = connector.read_db_creds()
+creds = connector.read_db_creds('db_creds.yaml')
 engine = connector.init_db_engine(creds)
 list_of_tables = connector.list_db_tables(engine)
 print(list_of_tables)
-
