@@ -69,3 +69,4 @@ compose.yml
 
 test*
 __pycache__
+*test*
