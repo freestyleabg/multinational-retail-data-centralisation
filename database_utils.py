@@ -26,6 +26,10 @@ class DatabaseConnector:
         with engine.connect() as conn:
             inspector = inspect(conn)
             return inspector.get_table_names()
+    
+    def upload_to_db(self, df, table_name):
+        with engine.connect() as conn:
+            df.to_sql(table_name, conn)
 
 
 connector = DatabaseConnector()
