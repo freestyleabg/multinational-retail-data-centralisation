@@ -1,6 +1,8 @@
+# %%
 import database_utils as du
 import pandas as pd
 
+# %%
 class DataExtractor:
     def __init__(self):
         # self.connector = du.DatabaseConnector()
@@ -19,3 +21,4 @@ trial = du.DatabaseConnector()
 extractor = DataExtractor()
 df = extractor.read_rds_table(trial, 'legacy_users')
 print(df)
+# %%
