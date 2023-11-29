@@ -22,7 +22,7 @@ extractor = DataExtractor()
 df = extractor.read_rds_table(connector, 'legacy_users', 'db_creds.yaml')
 print(df)
 cleaner = dc.DataCleaning()
-cleaner.clean_user_data(df)
+cleaner.clean_user_data(df, index_col='index')
 
 
 connector1 = du.DatabaseConnector()
