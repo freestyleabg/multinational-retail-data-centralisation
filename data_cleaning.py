@@ -5,7 +5,7 @@ class DataCleaning:
         pass
 
     @staticmethod
-    def clean_user_data(df, *args):
+    def clean_user_data(df, index_col=None):
         def clean_dates(df):
             for column in df.columns:
                 if 'date' in column:
@@ -22,11 +22,21 @@ class DataCleaning:
                 return address.replace('\n', ', ') if '\n' in address else address
             df['address'] = df['address'].apply(clean_single_address) 
         
+        def reset_index_col(df, index_col):
+            if index_col != None:
+                df.set_index(index_col, inplace=True, drop=True)
+                df.reset_index(drop=True, inplace=True)
+                df.index = df.index + 1
+            else:
+                return df
+
 
         clean_dates(df)
         clean_unkown_string(df)
         df.dropna(subset='address', inplace=True)
         clean_address(df)
+        reset_index_col(df, index_col)
+        
 
 
 
