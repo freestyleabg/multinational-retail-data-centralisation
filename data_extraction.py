@@ -2,6 +2,7 @@
 import database_utils as du
 import pandas as pd
 import data_cleaning as dc
+import tabula 
 # %%
 class DataExtractor:
     def __init__(self):
@@ -17,6 +18,11 @@ class DataExtractor:
             rds_table = pd.read_sql_table(table, conn)
             return rds_table
 
+    @staticmethod
+    def retrieve_pdf_data(self, url):
+        df = tabula.read_pdf(url)
+        return df
+
 connector = du.DatabaseConnector()
 extractor = DataExtractor()
 df = extractor.read_rds_table(connector, 'legacy_users', 'db_creds.yaml')
@@ -28,7 +34,8 @@ cleaner.clean_user_data(df, index_col='index')
 connector1 = du.DatabaseConnector()
 creds1 = connector1.read_db_creds('db_creds_local.yaml')
 engine = connector1.init_db_engine(creds1)
-connector1.upload_to_db(df, 'sales_data')
+connector1.upload_to_db(df, 'dim_users')
 # %%
 
 #Dont edit till you add comments!
+#WUKR5JLBGCF
