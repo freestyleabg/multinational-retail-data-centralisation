@@ -1,5 +1,7 @@
 import pandas as pd
-from dateutil.parser import parse
+#from dateutil.parser import parse
+
+
 class DataCleaning:
     def __init__(self) -> None:
         pass
@@ -28,14 +30,23 @@ class DataCleaning:
                 df.reset_index(drop=True, inplace=True)
                 df.index = df.index + 1
             else:
-                return df
-
-
+                return df   
+        
         clean_dates(df)
         clean_unkown_string(df)
         df.dropna(subset='address', inplace=True)
         clean_address(df)
         reset_index_col(df, index_col)
+    
+    @staticmethod
+    def clean_card_data(df):
+        df['expiry_date'] = pd.to_datetime(df['expiry_date'], errors='coerce', format='%m/%y')
+        df['expiry_date'] = df['expiry_date'].dt.strftime('%m/%y')
+        df['date_payment_confirmed'] = pd.to_datetime(df['date_payment_confirmed'], errors='coerce')
+        df.dropna(inplace=True)
+        
+
+
         
 
 
