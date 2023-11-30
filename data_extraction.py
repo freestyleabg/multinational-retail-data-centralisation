@@ -1,6 +1,7 @@
 from database_utils import DatabaseConnector
 from data_cleaning import DataCleaning
 import pandas as pd
+import data_cleaning as dc
 import tabula 
 
 
