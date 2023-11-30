@@ -2,7 +2,8 @@ from database_utils import DatabaseConnector
 from data_cleaning import DataCleaning
 import pandas as pd
 import data_cleaning as dc
-import tabula 
+import tabula
+import requests
 
 
 class DataExtractor:
@@ -24,6 +25,36 @@ class DataExtractor:
     def retrieve_pdf_data(url):
         df = tabula.read_pdf(url, 'dataframe', pages='all', multiple_tables=False)
         return df[0]
+    
+    @staticmethod
+    def list_number_of_stores(url, headers):
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            number_of_stores = data['number_stores']
+            print(f"Number of stores: {data['number_stores']}")
+        return number_of_stores
+    
+    @staticmethod
+    def retrieve_stores_data(url, headers):
+        store_json_list = []   
+        for store_num in range(number_of_stores):
+            response = requests.get(url.format(store_number=store_num), headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+            store_json = data
+            store_json_list.append(store_json)
+        store_df = pd.json_normalize(store_json_list)
+        return store_df
+
+# store_api_data['endpoints']['store_details'].format(store_number=store_num)        
+# store_json_list = []
+# for store_num in range(number_of_stores):
+#     store_json = extractor.retrieve_stores_data(store_api_data['endpoints']['store_details'].format(store_number=store_num), store_api_data['headers'])
+#     store_json_list.append(store_json)
+# store_df = pd.json_normalize(store_json_list)
+# store_df
+
 
 # Milestone 2.3
 aws_connector = DatabaseConnector()
@@ -40,6 +71,17 @@ local_connector.upload_to_db(user_df, 'dim_users')
 card_df = DataExtractor.retrieve_pdf_data("https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf")
 cleaner.clean_card_data(card_df)
 local_connector.upload_to_db(card_df, 'dim_card_details')
+store_api_data = {
+    'endpoints': {
+        'number_stores':'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores', 
+        'store_details':'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{store_number}'
+    },
+    'headers': {
+        'x-api-key': 'redacted'
+    }
+}
 
-#Dont edit till you add comments!
-#WUKR5JLBGCF
+number_of_stores = extractor.list_number_of_stores(store_api_data['endpoints']['number_stores'], store_api_data['headers'])
+#requests.get(store_api_data['endpoints']['store_details'].format(store_number=447), headers=store_api_data['headers']).json()
+
+extractor.retrieve_stores_data(store_api_data['endpoints']['store_details'], store_api_data['headers'])
