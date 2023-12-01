@@ -33,11 +33,11 @@ class DataCleaning:
         else:
             return df
 
-    def clean_user_data(self, df, index_col=None):
+    def clean_user_data(self, df, index_col='index'):
         self.clean_dates(df)
         self.clean_unkown_string(df)
         self.clean_address(df)
-        self.reset_index_col(df, index_col)
+        self.reset_index_col(df, index_col=index_col)
 
     # def clean_coordinates(self, df):
     #     mask = ((df['longitude'] == 'N/A') | df['longitude'].isna()) | \
@@ -51,10 +51,11 @@ class DataCleaning:
         df['date_payment_confirmed'] = pd.to_datetime(df['date_payment_confirmed'], errors='coerce')
         df.dropna(inplace=True)
 
-    def clean_store_data(self, df):
+    def clean_store_data(self, df, index_col='index'):
         self.clean_unkown_string(df)
         self.clean_address(df)
         self.clean_dates(df)
+        self.reset_index_col(df, index_col=index_col)
         # self.clean_coordinates(df)
         # self.reindex_store_columns(df)
         self.df = df.reindex(

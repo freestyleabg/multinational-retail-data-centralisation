@@ -81,7 +81,6 @@ number_of_stores = extractor.list_number_of_stores(
 store_df = extractor.retrieve_stores_data(
     store_api_data["endpoints"]["store_details"], store_api_data["headers"]
 )
-cleaner.clean_store_data(store_df)
 store_df = store_df.reindex(
     columns=[
         "index",
@@ -97,4 +96,5 @@ store_df = store_df.reindex(
         "opening_date",
     ]
 )
+cleaner.clean_store_data(store_df, index_col='index')
 local_connector.upload_to_db(store_df, "dim_store_details")
