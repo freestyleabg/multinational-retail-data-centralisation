@@ -79,4 +79,7 @@ store_api_data = {
 }
 
 number_of_stores = extractor.list_number_of_stores(store_api_data['endpoints']['number_stores'], store_api_data['headers'])
-extractor.retrieve_stores_data(store_api_data['endpoints']['store_details'], store_api_data['headers'])
+store_df = extractor.retrieve_stores_data(store_api_data['endpoints']['store_details'], store_api_data['headers'])
+cleaner.clean_store_data(store_df)
+store_df = store_df.reindex(columns=['index', 'store_code', 'store_type', 'staff_numbers', 'address', 'longitude',	'latitude', 'locality', 'country_code', 'continent', 'opening_date'])
+store_df
