@@ -4,6 +4,8 @@ import pandas as pd
 import data_cleaning as dc
 import tabula
 import requests
+import tabula
+import requests
 
 
 class DataExtractor:
