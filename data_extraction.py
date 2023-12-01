@@ -72,9 +72,7 @@ store_api_data = {
         "number_stores": "https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores",
         "store_details": "https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{store_number}",
     },
-    'headers': {
-        'x-api-key': 'redacted'
-    }
+    "headers": {"x-api-key": "redacted"},
 }
 
 number_of_stores = extractor.list_number_of_stores(
@@ -99,4 +97,4 @@ store_df = store_df.reindex(
         "opening_date",
     ]
 )
-store_df
+local_connector.upload_to_db(store_df, "dim_store_details")
