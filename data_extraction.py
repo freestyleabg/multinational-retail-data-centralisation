@@ -3,6 +3,13 @@ from data_cleaning import DataCleaning
 import pandas as pd
 import tabula
 import requests
+import boto3
+
+# Let's use Amazon S3
+s3 = boto3.resource('s3')
+# Print out bucket names
+for bucket in s3.buckets.all():
+    print(bucket.name)
 
 
 class DataExtractor:
@@ -98,3 +105,5 @@ store_df = store_df.reindex(
 )
 cleaner.clean_store_data(store_df, index_col='index')
 local_connector.upload_to_db(store_df, "dim_store_details")
+
+# Milestone 2.6
