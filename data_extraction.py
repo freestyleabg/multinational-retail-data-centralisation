@@ -5,14 +5,15 @@ import tabula
 import requests
 import boto3
 from io import StringIO
+
+
 def list_buckets():
     # Let's use Amazon S3
-    s3 = boto3.resource('s3')
+    s3 = boto3.resource("s3")
     # Print out bucket names
     for bucket in s3.buckets.all():
         print(bucket.name)
 
-    
 
 class DataExtractor:
     def __init__(self):
@@ -54,15 +55,16 @@ class DataExtractor:
             store_json_list.append(store_json)
         store_df = pd.json_normalize(store_json_list)
         return store_df
-    
+
     @staticmethod
     def extract_from_s3(url):
-        bucket_name, file_path = url.replace('s3://', '').split('/', 1)
-        s3 = boto3.client('s3')
+        bucket_name, file_path = url.replace("s3://", "").split("/", 1)
+        s3 = boto3.client("s3")
         response = s3.get_object(Bucket=bucket_name, Key=file_path)
-        csv = StringIO(response['Body'].read().decode('utf-8'))
+        csv = StringIO(response["Body"].read().decode("utf-8"))
         df = pd.read_csv(csv)
         return df
+
 
 # Milestone 2.3
 aws_connector = DatabaseConnector()
@@ -113,7 +115,7 @@ store_df = store_df.reindex(
         "opening_date",
     ]
 )
-cleaner.clean_store_data(store_df, index_col='index')
+cleaner.clean_store_data(store_df, index_col="index")
 local_connector.upload_to_db(store_df, "dim_store_details")
 
 # Milestone 2.6
