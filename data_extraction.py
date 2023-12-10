@@ -1,3 +1,4 @@
+# %% Run this code cell
 from database_utils import DatabaseConnector
 from data_cleaning import DataCleaning
 import pandas as pd
@@ -5,6 +6,7 @@ import tabula
 import requests
 import boto3
 from io import StringIO
+from IPython.display import display
 
 
 def list_buckets():
@@ -65,12 +67,18 @@ class DataExtractor:
         df = pd.read_csv(csv)
         return df
 
+    @staticmethod
+    def print_df(df, head=100):
+        with pd.option_context("display.max_rows", None, "display.max_columns", None):
+            display(df.head(head))
 
-# Milestone 2.3
-aws_connector = DatabaseConnector()
+
+# %% Milestone 2.3
 extractor = DataExtractor()
-user_df = extractor.read_rds_table(aws_connector, "legacy_users", "db_creds.yaml")
 cleaner = DataCleaning()
+
+aws_connector = DatabaseConnector()
+user_df = extractor.read_rds_table(aws_connector, "legacy_users", "db_creds.yaml")
 cleaner.clean_user_data(user_df, index_col="index")
 
 local_connector = DatabaseConnector()
@@ -78,14 +86,20 @@ creds1 = local_connector.read_db_creds("db_creds_local.yaml")
 engine = local_connector.init_db_engine(creds1)
 local_connector.upload_to_db(user_df, "dim_users")
 
-# Milestone 2.4
+# %% Milestone 2.4
+extractor = DataExtractor()
+cleaner = DataCleaning()
+
 card_df = DataExtractor.retrieve_pdf_data(
     "https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf"
 )
 cleaner.clean_card_data(card_df)
 local_connector.upload_to_db(card_df, "dim_card_details")
 
-# Milestone 2.5
+# %% Milestone 2.5
+extractor = DataExtractor()
+cleaner = DataCleaning()
+
 store_api_data = {
     "endpoints": {
         "number_stores": "https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores",
@@ -118,4 +132,12 @@ store_df = store_df.reindex(
 cleaner.clean_store_data(store_df, index_col="index")
 local_connector.upload_to_db(store_df, "dim_store_details")
 
-# Milestone 2.6
+# %% Milestone 2.6
+extractor = DataExtractor()
+cleaner = DataCleaning()
+
+product_df = DataExtractor.extract_from_s3("s3://data-handling-public/products.csv")
+cleaner.clean_unknown_string(product_df)
+cleaner.convert_product_weights(product_df)
+
+
