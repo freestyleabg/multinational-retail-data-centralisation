@@ -5,8 +5,9 @@ import pandas as pd
 import tabula
 import requests
 import boto3
-from io import StringIO
+import io
 from IPython.display import display
+import re
 
 
 def list_buckets():
@@ -60,12 +61,31 @@ class DataExtractor:
 
     @staticmethod
     def extract_from_s3(url):
-        bucket_name, file_path = url.replace("s3://", "").split("/", 1)
+        match = re.match(
+            r"(s3|http|https)://(?P<bucket>[-a-zA-Z]+)\.?[a-zA-Z0-9.-]*/(?P<path>.+)",
+            url,
+        )
+        bucket_info = match.groupdict()
+        bucket_name = bucket_info["bucket"]
+        file_path = bucket_info["path"]
+        
+        file_buffer = io.BytesIO() 
+        
         s3 = boto3.client("s3")
+
         response = s3.get_object(Bucket=bucket_name, Key=file_path)
-        csv = StringIO(response["Body"].read().decode("utf-8"))
-        df = pd.read_csv(csv)
-        return df
+        if 'csv' in  response['ContentType']:
+            csv_stream = response["Body"].read().decode("utf-8")
+            csv_file = io.StringIO(csv_stream)
+            df = pd.read_csv(csv_file)
+            return df
+        if 'json' in  response['ContentType']:
+            s3.download_fileobj(Bucket=bucket_name, Key=file_path, Fileobj=file_buffer)
+            byte_value = file_buffer.getvalue()
+            str_value = byte_value.decode('utf-8')
+            json_file = io.StringIO(str_value)
+            df = pd.read_json(json_file)
+            return df
 
     @staticmethod
     def print_df(df, head=100):
@@ -137,7 +157,44 @@ extractor = DataExtractor()
 cleaner = DataCleaning()
 
 product_df = DataExtractor.extract_from_s3("s3://data-handling-public/products.csv")
+
 cleaner.clean_unknown_string(product_df)
 cleaner.convert_product_weights(product_df)
+cleaner.clean_products_data(product_df)
+product_df = product_df.reindex(
+    columns=[
+        "product_name",
+        "product_price",
+        "weight",
+        "category",
+        "EAN",
+        "date_added",
+        "uuid",
+        "removed",
+        "product_code",
+    ]
+)
+extractor.print_df(product_df, 2000)
+local_connector.upload_to_db(product_df, "dim_products")
 
 
+# %% Milestone 2.7
+extractor = DataExtractor()
+cleaner = DataCleaning()
+
+aws_connector = DatabaseConnector()
+orders_df = extractor.read_rds_table(aws_connector, "orders_table", "db_creds.yaml")
+cleaner.clean_orders_data(orders_df)
+
+local_connector = DatabaseConnector()
+creds1 = local_connector.read_db_creds("db_creds_local.yaml")
+engine = local_connector.init_db_engine(creds1)
+local_connector.upload_to_db(orders_df, "orders_table")
+
+# %% Milestone 2.8
+extractor = DataExtractor()
+date_df = extractor.extract_from_s3(
+    "https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json"
+)
+print(date_df)
+# %%
