@@ -64,10 +64,9 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/linux,visualstudiocode,windows
 
 db_creds.yaml
-compose.yml
+db_creds_local.yaml
 .env
 
 test*
 __pycache__
 *test*
-*local*

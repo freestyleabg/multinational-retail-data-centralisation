@@ -1,0 +1,5 @@
+RDS_HOST: <local_host>
+RDS_PASSWORD: <local_password>
+RDS_USER: <local_user>
+RDS_DATABASE: <local_database>
+RDS_PORT: <local_port>

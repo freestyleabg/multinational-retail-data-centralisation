@@ -15,11 +15,33 @@ This project centralizes and streamlines data management in the retail sector, f
 
 Aiming to centralize retail data management across multiple nations, this project includes modules for data extraction, cleaning, and database interaction, with a particular focus on efficient data handling and management.
 
+## Technologies Used
+
+This project employs a diverse range of technologies, ensuring robustness and efficiency in data management:
+
+- **Python:** Primary programming language for script development.
+- **Pandas:** For data manipulation and analysis.
+- **Tabula:** Extracts tables from PDFs into DataFrame objects.
+- **Requests:** HTTP library for API interactions.
+- **Boto3:** AWS SDK for Python, used with Amazon S3.
+- **SQLAlchemy:** SQL toolkit and ORM library.
+- **YAML:** For configuration and data serialization.
+- **PostgreSQL:** Database system for structured data storage.
+- **Docker:** Utilized for containerizing the PostgreSQL database, enhancing portability and consistency across different environments.
+
 ## Features
 
-- **Data Extraction:** Scripts for extracting data from various sources including databases, PDFs, and APIs.
-- **Data Cleaning:** Utilities to clean and transform the extracted data for consistency.
-- **Database Integration:** Tools for uploading cleaned data into a centralized database system.
+- **Data Extraction:** 
+  - Scripts for extracting data from various sources, including:
+    - **Databases:** Using SQL queries and database connections to retrieve structured data.
+    - **PDFs:** Utilizing libraries like `tabula` to parse and extract data from PDF documents.
+    - **APIs:** Fetching data from web APIs in JSON format.
+    - **Amazon S3 Buckets:** Integrating with AWS to retrieve data stored in S3 buckets.
+- **Data Cleaning:** 
+  - Utilities to clean and transform the extracted data for consistency. This includes handling missing values, standardizing formats, and removing duplicates.
+- **Database Integration:** 
+  - Tools for uploading cleaned data into a centralized database system, ensuring data integrity and efficient storage.
+
 
 ## Repository Structure
 
