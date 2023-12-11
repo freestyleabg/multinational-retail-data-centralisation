@@ -56,4 +56,3 @@ Contributions to improve the project are welcome. Please read the contributing g
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
-
