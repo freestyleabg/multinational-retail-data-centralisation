@@ -1,4 +1,6 @@
 import pandas as pd
+from datetime import datetime
+import numpy as np
 
 
 class DataCleaning:
@@ -76,7 +78,21 @@ class DataCleaning:
         self.clean_dates(df)
         df["removed"] = df["removed"] == "Removed"
         df["category"] = df["category"].astype("category")
-        df['weight'] = df['weight'].round(3)
+        df["weight"] = df["weight"].round(3)
 
     def clean_orders_data(self, df):
-        df.drop(columns=['first_name', 'last_name', '1', 'level_0'], inplace=True)
+        df.drop(columns=["first_name", "last_name", "1", "level_0"], inplace=True)
+
+    def clean_date_data(self, df):
+        self.clean_unknown_string(df)
+        df.replace("NULL", np.nan, inplace=True)
+        df.dropna(inplace=True)
+        df["datetime"] = df.apply(
+            lambda row: datetime.strptime(
+                f"{row['year']}-{row['month']}-{row['day']} {row['timestamp']}",
+                "%Y-%m-%d %H:%M:%S",
+            ),
+            axis=1,
+        )
+        df.drop(columns=["year", "month", "day", "timestamp"], inplace=True)
+        df["time_period"] = df["time_period"].astype("category")

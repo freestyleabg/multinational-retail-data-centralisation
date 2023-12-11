@@ -68,21 +68,21 @@ class DataExtractor:
         bucket_info = match.groupdict()
         bucket_name = bucket_info["bucket"]
         file_path = bucket_info["path"]
-        
-        file_buffer = io.BytesIO() 
-        
+
+        file_buffer = io.BytesIO()
+
         s3 = boto3.client("s3")
 
         response = s3.get_object(Bucket=bucket_name, Key=file_path)
-        if 'csv' in  response['ContentType']:
+        if "csv" in response["ContentType"]:
             csv_stream = response["Body"].read().decode("utf-8")
             csv_file = io.StringIO(csv_stream)
             df = pd.read_csv(csv_file)
             return df
-        if 'json' in  response['ContentType']:
+        if "json" in response["ContentType"]:
             s3.download_fileobj(Bucket=bucket_name, Key=file_path, Fileobj=file_buffer)
             byte_value = file_buffer.getvalue()
-            str_value = byte_value.decode('utf-8')
+            str_value = byte_value.decode("utf-8")
             json_file = io.StringIO(str_value)
             df = pd.read_json(json_file)
             return df
@@ -193,8 +193,15 @@ local_connector.upload_to_db(orders_df, "orders_table")
 
 # %% Milestone 2.8
 extractor = DataExtractor()
+cleaner = DataCleaning()
+
 date_df = extractor.extract_from_s3(
     "https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json"
 )
-print(date_df)
-# %%
+cleaner.clean_date_data(date_df)
+date_df = date_df.reindex(columns=["datetime", "time_period", "date_uuid"])
+
+local_connector = DatabaseConnector()
+creds1 = local_connector.read_db_creds("db_creds_local.yaml")
+engine = local_connector.init_db_engine(creds1)
+local_connector.upload_to_db(date_df, "dim_date_times")
