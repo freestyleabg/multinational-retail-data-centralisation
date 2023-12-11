@@ -57,3 +57,10 @@ Contributions to improve the project are welcome. Please read the contributing g
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
+<<<<<<< HEAD
+=======
+```
+
+Replace `[repository-url]` and `[repository-name]` with the actual URL and name of your GitHub repository. Also, update the License section based on the actual license you choose for your project.
+```
+>>>>>>> c85547b4747d44fcd6479b4e2e5f063158f71c12
