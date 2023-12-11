@@ -1,6 +1,6 @@
 import yaml
 from sqlalchemy import create_engine, inspect
-#import pandas as pd
+# import pandas as pd
 
 
 class DatabaseConnector:
@@ -33,7 +33,7 @@ class DatabaseConnector:
     def upload_to_db(self, df, table_name):
         with self.engine.connect() as conn:
             try:
-                df.to_sql(table_name, conn)
+                df.to_sql(table_name, conn, index=False)
             except ValueError as err:
                 print(err.__str__())
             else:
