@@ -41,6 +41,8 @@ class DataCleaning:
         self.clean_unknown_string(df)
         self.clean_address(df)
         self.reset_index_col(df, index_col=index_col)
+        df.loc[df['country_code'] == 'GGB'] = 'GB'
+        
 
     @staticmethod
     def clean_card_data(df):
@@ -57,6 +59,13 @@ class DataCleaning:
         self.clean_unknown_string(df)
         self.clean_address(df)
         self.clean_dates(df)
+        mask = df['store_type'] == 'Web Portal'
+        df.loc[mask, 'longitude'] = np.nan
+        df.loc[mask, 'latitude'] = np.nan
+        df.loc[mask, 'locality'] = np.nan
+        df.loc[mask, 'address'] = 'N/A'
+        df.loc[mask, 'locality'] = 'N/A'
+        df['staff_numbers'] = df['staff_numbers'].str.extract(r'([0-9]{1,2})')
         self.reset_index_col(df, index_col=index_col)
 
     def convert_product_weights(self, df):

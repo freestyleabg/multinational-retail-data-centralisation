@@ -5,9 +5,10 @@ import pandas as pd
 import tabula
 import requests
 import boto3
-import io
+from io import BytesIO, StringIO
 from IPython.display import display
 import re
+from sqlalchemy import text
 
 
 def list_buckets():
@@ -69,21 +70,21 @@ class DataExtractor:
         bucket_name = bucket_info["bucket"]
         file_path = bucket_info["path"]
 
-        file_buffer = io.BytesIO()
+        file_buffer = BytesIO()
 
         s3 = boto3.client("s3")
 
         response = s3.get_object(Bucket=bucket_name, Key=file_path)
         if "csv" in response["ContentType"]:
             csv_stream = response["Body"].read().decode("utf-8")
-            csv_file = io.StringIO(csv_stream)
+            csv_file = StringIO(csv_stream)
             df = pd.read_csv(csv_file)
             return df
         if "json" in response["ContentType"]:
             s3.download_fileobj(Bucket=bucket_name, Key=file_path, Fileobj=file_buffer)
             byte_value = file_buffer.getvalue()
             str_value = byte_value.decode("utf-8")
-            json_file = io.StringIO(str_value)
+            json_file = StringIO(str_value)
             df = pd.read_json(json_file)
             return df
 
@@ -93,6 +94,7 @@ class DataExtractor:
             display(df.head(head))
 
 
+# %%
 if __name__ == "__main__":
     # %% Milestone 2.3
     extractor = DataExtractor()
@@ -103,8 +105,8 @@ if __name__ == "__main__":
     cleaner.clean_user_data(user_df, index_col="index")
 
     local_connector = DatabaseConnector()
-    creds1 = local_connector.read_db_creds("db_creds_local.yaml")
-    engine = local_connector.init_db_engine(creds1)
+    local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+    engine = local_connector.init_db_engine(local_creds)
     local_connector.upload_to_db(user_df, "dim_users")
 
     # %% Milestone 2.4
@@ -120,6 +122,10 @@ if __name__ == "__main__":
     # %% Milestone 2.5
     extractor = DataExtractor()
     cleaner = DataCleaning()
+    
+    local_connector = DatabaseConnector()
+    local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+    engine = local_connector.init_db_engine(local_creds)
 
     store_api_data = {
         "endpoints": {
@@ -187,8 +193,8 @@ if __name__ == "__main__":
     cleaner.clean_orders_data(orders_df)
 
     local_connector = DatabaseConnector()
-    creds1 = local_connector.read_db_creds("db_creds_local.yaml")
-    engine = local_connector.init_db_engine(creds1)
+    local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+    engine = local_connector.init_db_engine(local_creds)
     local_connector.upload_to_db(orders_df, "orders_table")
 
     # %% Milestone 2.8
@@ -202,6 +208,70 @@ if __name__ == "__main__":
     date_df = date_df.reindex(columns=["datetime", "time_period", "date_uuid"])
 
     local_connector = DatabaseConnector()
-    creds1 = local_connector.read_db_creds("db_creds_local.yaml")
-    engine = local_connector.init_db_engine(creds1)
+    local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+    engine = local_connector.init_db_engine(local_creds)
     local_connector.upload_to_db(date_df, "dim_date_times")
+
+    # %% Milestone 3.1
+    local_connector = DatabaseConnector()
+    local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+    engine = local_connector.init_db_engine(local_creds)
+    with engine.connect() as conn:
+        conn.execute(
+            text(
+                """
+                    ALTER TABLE orders_table
+                        ALTER COLUMN date_uuid TYPE uuid USING date_uuid::uuid,
+                        ALTER COLUMN user_uuid TYPE uuid USING user_uuid::uuid,
+                        ALTER COLUMN card_number TYPE varchar(19),
+                        ALTER COLUMN store_code TYPE varchar(12),
+                        ALTER COLUMN product_code TYPE varchar(11),
+                        ALTER COLUMN product_quantity TYPE int2
+                """
+            )
+        )
+        conn.commit()
+    # %% Milestone 3.2
+    local_connector = DatabaseConnector()
+    local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+    engine = local_connector.init_db_engine(local_creds)
+    with engine.connect() as conn:
+        conn.execute(
+            text(
+                """
+                    ALTER TABLE dim_users_table
+                        ALTER COLUMN first_name TYPE varchar(255),
+                        ALTER COLUMN last_name TYPE varchar(255),
+                        ALTER COLUMN date_of_birth TYPE date,
+                        ALTER COLUMN country_code TYPE varchar(2),
+                        ALTER COLUMN user_uuid TYPE uuid USING user_uuid::uuid,
+                        ALTER COLUMN join_Date TYPE date
+                """
+            )
+        )
+        conn.commit()
+    # %% Milestone 3.3
+    local_connector = DatabaseConnector()
+    local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+    engine = local_connector.init_db_engine(local_creds)
+    with engine.connect() as conn:
+        conn.execute(
+            text(
+                """
+                    ALTER TABLE dim_store_details
+                        ALTER COLUMN longitude TYPE float4 USING longitude::real,
+                        ALTER COLUMN locality TYPE varchar(255),
+                        ALTER COLUMN store_code TYPE varchar(12),
+                        ALTER COLUMN staff_numbers TYPE int2 USING staff_numbers::int2,
+                        ALTER COLUMN opening_date TYPE date,
+                        ALTER COLUMN store_type TYPE varchar(255),
+                        ALTER COLUMN latitude TYPE float4 USING latitude::real,
+                        ALTER COLUMN country_code TYPE varchar(2),
+                        ALTER COLUMN continent TYPE varchar(255)
+
+
+                """
+            )
+        )
+        conn.commit()
+# %%
