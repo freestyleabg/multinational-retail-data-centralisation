@@ -1,6 +1,5 @@
 import yaml
 from sqlalchemy import create_engine, inspect
-# import pandas as pd
 
 
 class DatabaseConnector:
@@ -38,10 +37,3 @@ class DatabaseConnector:
                 print(err.__str__())
             else:
                 print(f"{table_name} T")
-
-
-# connector = DatabaseConnector()
-# creds = connector.read_db_creds('db_creds.yaml')
-# engine = connector.init_db_engine(creds)
-# list_of_tables = connector.list_db_tables()
-# print(list_of_tables)
