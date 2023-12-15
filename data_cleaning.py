@@ -7,7 +7,8 @@ class DataCleaning:
     def __init__(self) -> None:
         pass
 
-    def clean_unknown_string(self, df):
+    @staticmethod
+    def clean_unknown_string(df):
         mask = r"^[A-Z0-9]{10}$"
         for column in df.columns:
             df[column] = df[column][
@@ -29,7 +30,7 @@ class DataCleaning:
         df["address"] = df["address"].apply(clean_single_address)
 
     def reset_index_col(self, df, index_col):
-        if index_col != None:
+        if index_col is not None:
             df.set_index(index_col, inplace=True, drop=True)
             df.reset_index(drop=True, inplace=True)
             df.index = df.index + 1
@@ -41,31 +42,33 @@ class DataCleaning:
         self.clean_unknown_string(df)
         self.clean_address(df)
         self.reset_index_col(df, index_col=index_col)
-        df.loc[df['country_code'] == 'GGB'] = 'GB'
-        
+        df.loc[df["country_code"] == "GGB"] = "GB"
 
-    @staticmethod
-    def clean_card_data(df):
-        df["expiry_date"] = pd.to_datetime(
-            df["expiry_date"], errors="coerce", format="%m/%y"
-        )
-        df["expiry_date"] = df["expiry_date"].dt.strftime("%m/%y")
-        df["date_payment_confirmed"] = pd.to_datetime(
-            df["date_payment_confirmed"], errors="coerce"
-        )
+    def clean_card_data(self, df):
+        self.clean_unknown_string(df)
+        for column in df.columns:
+           mask = df[column] == column
+           df.loc[mask, column] = np.nan
         df.dropna(inplace=True)
+        # df["expiry_date"] = pd.to_datetime(
+        #     df["expiry_date"], errors="raise", format="%m/%y"
+        # )
+        # df["expiry_date"] = df["expiry_date"].dt.strftime("%m/%y")
+        # df["date_payment_confirmed"] = pd.to_datetime(
+        #     df["date_payment_confirmed"], errors="raise"
+        # )
 
     def clean_store_data(self, df, index_col="index"):
         self.clean_unknown_string(df)
         self.clean_address(df)
         self.clean_dates(df)
-        mask = df['store_type'] == 'Web Portal'
-        df.loc[mask, 'longitude'] = np.nan
-        df.loc[mask, 'latitude'] = np.nan
-        df.loc[mask, 'locality'] = np.nan
-        df.loc[mask, 'address'] = 'N/A'
-        df.loc[mask, 'locality'] = 'N/A'
-        df['staff_numbers'] = df['staff_numbers'].str.extract(r'([0-9]{1,2})')
+        mask = df["store_type"] == "Web Portal"
+        df.loc[mask, "longitude"] = np.nan
+        df.loc[mask, "latitude"] = np.nan
+        df.loc[mask, "locality"] = np.nan
+        df.loc[mask, "address"] = "N/A"
+        df.loc[mask, "locality"] = "N/A"
+        df["staff_numbers"] = df["staff_numbers"].str.extract(r"([0-9]{1,2})")
         self.reset_index_col(df, index_col=index_col)
 
     def convert_product_weights(self, df):
@@ -88,6 +91,7 @@ class DataCleaning:
         df["removed"] = df["removed"] == "Removed"
         df["category"] = df["category"].astype("category")
         df["weight"] = df["weight"].round(3)
+        df["product_price"] = df["product_price"].str.replace("£", "")
 
     def clean_orders_data(self, df):
         df.drop(columns=["first_name", "last_name", "1", "level_0"], inplace=True)
@@ -103,5 +107,6 @@ class DataCleaning:
             ),
             axis=1,
         )
-        df.drop(columns=["year", "month", "day", "timestamp"], inplace=True)
+        # df.drop(columns=["year", "month", "day", "timestamp"], inplace=True)
+        df.drop(columns=["timestamp"], inplace=True)
         df["time_period"] = df["time_period"].astype("category")
