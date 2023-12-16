@@ -47,11 +47,15 @@ class DataCleaning:
         df.loc[df["country_code"] == "GGB"] = "GB"
 
     def clean_card_data(self, df):
+        df.dropna(inplace=True)
         self.clean_unknown_string(df)
         for column in df.columns:
             mask = df[column] == column
             df.loc[mask, column] = np.nan
         df.dropna(inplace=True)
+        df.loc[:, "card_number"] = df.loc[:, "card_number"].str.replace(
+            r"[\?]+", "", regex=True
+        )
         # df["expiry_date"] = pd.to_datetime(
         #     df["expiry_date"], errors="raise", format="%m/%y"
         # )
@@ -82,7 +86,7 @@ class DataCleaning:
         df["weight"] = df["weight"].str.extract(
             r"([0-9]+\.[0-9]+|[0-9]+\*[0-9]+|[0-9]+)"
         )
-        mask = df["weight"].str.contains("\*")
+        mask = df["weight"].str.contains(r"\*")
         df.loc[mask, "weight"] = df.loc[mask, "weight"].apply(
             lambda x: ast.literal_eval(x)
         )
