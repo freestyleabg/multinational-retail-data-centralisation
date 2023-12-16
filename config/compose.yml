@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       PGDATA: /var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - 5432:5432
     volumes:
       - db_data:/var/lib/postgresql/data
 
@@ -23,10 +23,6 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
       PGADMIN_LISTEN_PORT: 80
     ports:
-      - "5480:80"
+      - 5480:80
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-
-volumes:
-  db-data:
-  pgadmin-data:

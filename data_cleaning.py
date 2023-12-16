@@ -1,3 +1,4 @@
+import ast
 from datetime import datetime
 
 import numpy as np
@@ -82,7 +83,9 @@ class DataCleaning:
             r"([0-9]+\.[0-9]+|[0-9]+\*[0-9]+|[0-9]+)"
         )
         mask = df["weight"].str.contains("\*")
-        df.loc[mask, "weight"] = df.loc[mask, "weight"].apply(lambda x: eval(x))
+        df.loc[mask, "weight"] = df.loc[mask, "weight"].apply(
+            lambda x: ast.literal_eval(x)
+        )
         df["weight"] = df["weight"].astype(float)
         df["weight"] = df["weight_unit"].map(unit_factors) * df["weight"]
         df.drop(columns="weight_unit", inplace=True)

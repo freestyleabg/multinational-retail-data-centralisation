@@ -70,3 +70,6 @@ db_creds_local.yaml
 test*
 __pycache__
 *test*
+
+# Trunk Checker
+.trunk

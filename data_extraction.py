@@ -43,7 +43,7 @@ class DataExtractor:
 
     @staticmethod
     def list_number_of_stores(url, headers):
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=60)
         if response.status_code == 200:
             data = response.json()
             number_of_stores = data["number_stores"]
@@ -54,7 +54,9 @@ class DataExtractor:
     def retrieve_stores_data(url, headers):
         store_json_list = []
         for store_num in range(number_of_stores):
-            response = requests.get(url.format(store_number=store_num), headers=headers)
+            response = requests.get(
+                url.format(store_number=store_num), headers=headers, timeout=60
+            )
             if response.status_code == 200:
                 data = response.json()
             store_json = data
