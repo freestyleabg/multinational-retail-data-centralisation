@@ -1,6 +1,7 @@
-import pandas as pd
 from datetime import datetime
+
 import numpy as np
+import pandas as pd
 
 
 class DataCleaning:
@@ -47,8 +48,8 @@ class DataCleaning:
     def clean_card_data(self, df):
         self.clean_unknown_string(df)
         for column in df.columns:
-           mask = df[column] == column
-           df.loc[mask, column] = np.nan
+            mask = df[column] == column
+            df.loc[mask, column] = np.nan
         df.dropna(inplace=True)
         # df["expiry_date"] = pd.to_datetime(
         #     df["expiry_date"], errors="raise", format="%m/%y"

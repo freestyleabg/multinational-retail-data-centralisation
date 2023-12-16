@@ -1,14 +1,16 @@
 # %% Run this code cell
-from database_utils import DatabaseConnector
-from data_cleaning import DataCleaning
-import pandas as pd
-import tabula
-import requests
-import boto3
-from io import BytesIO, StringIO
-from IPython.display import display
 import re
+from io import BytesIO, StringIO
+
+import boto3
+import pandas as pd
+import requests
+import tabula
+from IPython.display import display
 from sqlalchemy import text
+
+from data_cleaning import DataCleaning
+from database_utils import DatabaseConnector
 
 
 def list_buckets():
@@ -207,7 +209,7 @@ date_df = extractor.extract_from_s3(
     "https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json"
 )
 cleaner.clean_date_data(date_df)
-#date_df = date_df.reindex(columns=["datetime", "time_period", "date_uuid"])
+# date_df = date_df.reindex(columns=["datetime", "time_period", "date_uuid"])
 
 local_connector = DatabaseConnector()
 local_creds = local_connector.read_db_creds("db_creds_local.yaml")
@@ -292,7 +294,7 @@ with engine.connect() as conn:
         )
     )
     conn.commit()
-# %% 
+# %%
 local_connector = DatabaseConnector()
 local_creds = local_connector.read_db_creds("db_creds_local.yaml")
 engine = local_connector.init_db_engine(local_creds)
@@ -316,7 +318,7 @@ with engine.connect() as conn:
         )
     )
     conn.commit()
-# %% Milestone 3.5 
+# %% Milestone 3.5
 local_connector = DatabaseConnector()
 local_creds = local_connector.read_db_creds("db_creds_local.yaml")
 engine = local_connector.init_db_engine(local_creds)
@@ -434,8 +436,7 @@ with engine.connect() as conn:
                     FOREIGN KEY(user_uuid) 
                     REFERENCES dim_users_table (user_uuid);
                 
-            """   
+            """
         )
     )
     conn.commit()
-
