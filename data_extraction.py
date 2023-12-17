@@ -109,7 +109,7 @@ cleaner.clean_user_data(user_df, index_col="index")
 local_connector = DatabaseConnector()
 local_creds = local_connector.read_db_creds("db_creds_local.yaml")
 engine = local_connector.init_db_engine(local_creds)
-local_connector.upload_to_db(user_df, "dim_users")
+local_connector.upload_to_db(user_df, "dim_users_table")
 
 # %% Milestone 2.4
 extractor = DataExtractor()
@@ -129,9 +129,6 @@ local_connector.upload_to_db(card_df, "dim_card_details")
 extractor = DataExtractor()
 cleaner = DataCleaning()
 
-local_connector = DatabaseConnector()
-local_creds = local_connector.read_db_creds("db_creds_local.yaml")
-engine = local_connector.init_db_engine(local_creds)
 
 store_api_data = {
     "endpoints": {
@@ -163,6 +160,10 @@ store_df = store_df.reindex(
     ]
 )
 cleaner.clean_store_data(store_df, index_col="index")
+
+local_connector = DatabaseConnector()
+local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+engine = local_connector.init_db_engine(local_creds)
 local_connector.upload_to_db(store_df, "dim_store_details")
 
 # %% Milestone 2.6
@@ -272,7 +273,7 @@ with engine.connect() as conn:
                     ALTER COLUMN opening_date TYPE date,
                     ALTER COLUMN store_type TYPE varchar(255),
                     ALTER COLUMN latitude TYPE float4 USING latitude::real,
-                    ALTER COLUMN country_code TYPE varchar(2),
+                    ALTER COLUMN country_code TYPE varchar(3),
                     ALTER COLUMN continent TYPE varchar(255)
 
 
@@ -406,6 +407,7 @@ with engine.connect() as conn:
     )
     conn.commit()
 # %% Milestone 3.9
+
 local_connector = DatabaseConnector()
 local_creds = local_connector.read_db_creds("db_creds_local.yaml")
 engine = local_connector.init_db_engine(local_creds)
@@ -442,3 +444,229 @@ with engine.connect() as conn:
         )
     )
     conn.commit()
+# %% Milestone 4.1
+
+local_connector = DatabaseConnector()
+local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+engine = local_connector.init_db_engine(local_creds)
+with engine.connect() as conn:
+    result = conn.execute(
+        text(
+            """
+                SELECT s.country_code, COUNT(DISTINCT s.store_code)
+                FROM orders_table o
+                JOIN dim_store_details s ON s.store_code = o.store_code
+                GROUP BY s.country_code
+            """
+        )
+    )
+    for row in result:
+        print(row)
+
+# %% Milestone 4.2
+
+local_connector = DatabaseConnector()
+local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+engine = local_connector.init_db_engine(local_creds)
+with engine.connect() as conn:
+    result = conn.execute(
+        text(
+            """
+                SELECT s.locality, COUNT(DISTINCT s.store_code) as num_stores
+                FROM orders_table o
+                JOIN dim_store_details s ON s.store_code = o.store_code
+                GROUP BY s.locality
+                ORDER BY num_stores DESC
+                LIMIT 7
+            """
+        )
+    )
+    for row in result:
+        print(row)
+
+# %% Milestone 4.3
+
+local_connector = DatabaseConnector()
+local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+engine = local_connector.init_db_engine(local_creds)
+with engine.connect() as conn:
+    result = conn.execute(
+        text(
+            """
+                SELECT ROUND(SUM(o.product_quantity * p.product_price)::NUMERIC, 2)  as total_sales, d.month
+                FROM orders_table o
+                JOIN dim_date_times d ON d.date_uuid = o.date_uuid
+                JOIN dim_products p ON o.product_code = p.product_code
+                GROUP BY d.month
+                ORDER BY total_sales DESC
+                LIMIT 6
+            """
+        )
+    )
+    for row in result:
+        print(row)
+
+# %% Milestone 4.4
+
+local_connector = DatabaseConnector()
+local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+engine = local_connector.init_db_engine(local_creds)
+with engine.connect() as conn:
+    result = conn.execute(
+        text(
+            """
+                SELECT
+                    COUNT(*) as total_sales,
+                    SUM(o.product_quantity) as total_products_sold, 
+                    CASE 
+                        WHEN s.store_type = 'Web Portal' THEN 'Online'
+                        ELSE 'Offline' 
+                    END AS location
+                FROM orders_table o
+                JOIN dim_store_details s ON s.store_code = o.store_code
+                JOIN dim_products p ON o.product_code = p.product_code
+                GROUP BY location
+            """
+        )
+    )
+    for row in result:
+        print(row)
+
+# %% Milestone 4.5
+
+local_connector = DatabaseConnector()
+local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+engine = local_connector.init_db_engine(local_creds)
+with engine.connect() as conn:
+    result = conn.execute(
+        text(
+            """
+                WITH global_products_sold AS (
+                    SELECT (SUM(o.product_quantity* p.product_price)) AS total
+                    FROM orders_table o
+                    JOIN dim_products p  ON o.product_code = p.product_code
+                )
+
+                SELECT
+                    s.store_type,
+                    ROUND(SUM(o.product_quantity * p.product_price)::NUMERIC,2) as total_sales,
+                    ROUND(((SUM(o.product_quantity * p.product_price) * 100) / (SELECT total FROM global_products_sold))::NUMERIC, 2) AS percentage_total
+                FROM orders_table o
+                JOIN dim_store_details s ON s.store_code = o.store_code
+                JOIN dim_products p ON o.product_code = p.product_code
+                GROUP BY s.store_type
+                ORDER BY total_sales DESC;
+            """
+        )
+    )
+    for row in result:
+        print(row)
+# %% Milestone 4.6
+
+local_connector = DatabaseConnector()
+local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+engine = local_connector.init_db_engine(local_creds)
+with engine.connect() as conn:
+    result = conn.execute(
+        text(
+            """
+                SELECT
+                    ROUND(SUM(o.product_quantity * p.product_price)::NUMERIC,2) as total_sales,
+                    d.year,
+                    d.month
+                FROM orders_table o
+                JOIN dim_store_details s ON s.store_code = o.store_code
+                JOIN dim_products p ON o.product_code = p.product_code
+                JOIN dim_date_times d on d.date_uuid = o.date_uuid
+                GROUP BY d.year, d.month
+                ORDER BY total_sales DESC
+                LIMIT 10;
+            """
+        )
+    )
+    for row in result:
+        print(row)
+
+# %% Milestone 4.7
+
+local_connector = DatabaseConnector()
+local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+engine = local_connector.init_db_engine(local_creds)
+with engine.connect() as conn:
+    result = conn.execute(
+        text(
+            """
+                SELECT
+                    SUM(staff_numbers)::NUMERIC as total_staff_numbers,
+                    country_code
+                FROM dim_store_details s 
+                GROUP BY country_code
+                ORDER BY total_staff_numbers DESC
+            """
+        )
+    )
+    for row in result:
+        print(row)
+
+# %% Milestone 4.8
+
+local_connector = DatabaseConnector()
+local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+engine = local_connector.init_db_engine(local_creds)
+with engine.connect() as conn:
+    result = conn.execute(
+        text(
+            """
+                SELECT
+                    ROUND(SUM(o.product_quantity * p.product_price)::NUMERIC,2) as total_sales,
+                    s.store_type,
+                    s.country_code
+                    
+                FROM orders_table o
+                JOIN dim_store_details s ON s.store_code = o.store_code
+                JOIN dim_products p ON o.product_code = p.product_code
+                WHERE s.country_code = 'DE'
+                GROUP BY s.country_code, s.store_type
+                ORDER BY total_sales ASC
+                LIMIT 10;
+            """
+        )
+    )
+    for row in result:
+        print(row)
+
+
+# %% Milestone 4.9
+
+local_connector = DatabaseConnector()
+local_creds = local_connector.read_db_creds("db_creds_local.yaml")
+engine = local_connector.init_db_engine(local_creds)
+with engine.connect() as conn:
+    result = conn.execute(
+        text(
+            """
+                WITH cte AS (
+                    SELECT
+                        year,
+                        datetime,
+                        LEAD (datetime, 1)
+                        OVER (
+                            PARTITION BY year
+                            ORDER BY datetime
+                        ) as next_datetime
+                    FROM dim_date_times
+                    )
+
+                SELECT
+                    year,
+                    AVG(next_datetime - datetime) as actual_time_taken
+                FROM cte
+                GROUP BY year
+                ORDER BY actual_time_taken DESC
+                LIMIT 5;
+            """
+        )
+    )
+    for row in result:
+        print(row)
+
