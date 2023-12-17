@@ -1,4 +1,4 @@
-import ast
+from ast import literal_eval
 from datetime import datetime
 
 import numpy as np
@@ -69,12 +69,16 @@ class DataCleaning:
         self.clean_address(df)
         self.clean_dates(df)
         mask = df["store_type"] == "Web Portal"
+        # df.loc[mask, "country_code"] = "N/A"
+        df.loc[mask, "continent"] = "N/A"
         df.loc[mask, "longitude"] = np.nan
         df.loc[mask, "latitude"] = np.nan
-        df.loc[mask, "locality"] = np.nan
         df.loc[mask, "address"] = "N/A"
-        df.loc[mask, "locality"] = "N/A"
-        df["staff_numbers"] = df["staff_numbers"].str.extract(r"([0-9]{1,2})")
+        # df.loc[mask, "locality"] = "N/A"
+        df.loc[:, "staff_numbers"] = df["staff_numbers"].str.replace(
+            r"[A-Za-z]+", "", regex=True
+        )
+        df.loc[:, "continent"] = df["continent"].str.replace(r"^[a-z]+", "", regex=True)
         self.reset_index_col(df, index_col=index_col)
 
     def convert_product_weights(self, df):
@@ -87,9 +91,7 @@ class DataCleaning:
             r"([0-9]+\.[0-9]+|[0-9]+\*[0-9]+|[0-9]+)"
         )
         mask = df["weight"].str.contains(r"\*")
-        df.loc[mask, "weight"] = df.loc[mask, "weight"].apply(
-            lambda x: ast.literal_eval(x)
-        )
+        df.loc[mask, "weight"] = df.loc[mask, "weight"].apply(lambda x: literal_eval(x))
         df["weight"] = df["weight"].astype(float)
         df["weight"] = df["weight_unit"].map(unit_factors) * df["weight"]
         df.drop(columns="weight_unit", inplace=True)
