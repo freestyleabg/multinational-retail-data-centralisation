@@ -32,21 +32,32 @@ This project employs a diverse range of technologies, ensuring robustness and ef
 ## Features
 
 ### Data Extraction:
+
 - **Databases:** Utilizes SQLAlchemy and custom connectors to interface with RDS databases. Capable of executing SQL queries and retrieving structured data efficiently.
 - **PDFs:** Leverages the Tabula library to extract tables from PDF documents directly into DataFrame objects.
 - **APIs:** Uses the Requests library for interacting with web APIs, fetching data in JSON format.
 - **Amazon S3 Buckets:** Uses Boto3, the AWS SDK for Python, for interacting with Amazon S3, handling data types like CSV and JSON.
-### Data Cleaning: 
-- Utilities to clean and transform the extracted data for consistency. This includes handling missing values, standardizing formats, and removing duplicates.
-### Database Integration:
-- Tools for uploading cleaned data into a centralized database system, ensuring data integrity and efficient storage.
 
+### Data Cleaning:
+
+- Utilities to clean and transform the extracted data for consistency. This includes handling missing values, standardizing formats, and removing duplicates.
+
+### Database Integration:
+
+- Tools for uploading cleaned data into a centralized database system, ensuring data integrity and efficient storage.
 
 ## Repository Structure
 
-- data_extraction.py
-- data_cleaning.py
-- database_utils.py
+```
+├── data_extraction.py    # Script for extracting data from various sources
+├── data_cleaning.py      # Script for cleaning and standardizing data
+├── database_utils.py     # Utilities for database operations
+└── config/               # Configuration files and templates
+    ├── db_creds_local.yaml
+    ├── db_creds.yaml
+    ├── .env.template
+    └── compose.yml
+```
 
 ## Getting Started
 
