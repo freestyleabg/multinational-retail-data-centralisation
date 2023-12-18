@@ -1,4 +1,4 @@
-# Centralized Data Management for Retail
+# Multinational Retail Data Centralisation
 
 This project centralizes and streamlines data management in the retail sector, featuring Python scripts for data extraction, cleaning, and database utilities, focusing on handling diverse data formats and sources.
 
