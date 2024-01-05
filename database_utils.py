@@ -1,6 +1,7 @@
 import yaml
 from sqlalchemy import create_engine, inspect
 
+
 class DatabaseConnector:
     """
     This class provides methods to connect to a database, read credentials, list database tables, and upload data.

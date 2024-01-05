@@ -9,6 +9,7 @@ import tabula
 from IPython.display import display
 
 from data_cleaning import DataCleaning
+from database_utils import DatabaseConnector
 
 
 def list_buckets():

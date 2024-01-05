@@ -1,4 +1,3 @@
-
 -- Milestone 3.1
 -- Altering 'orders_table' with various column type changes
 ALTER TABLE orders_table
@@ -231,5 +230,3 @@ FROM cte
 GROUP BY year
 ORDER BY actual_time_taken DESC
 LIMIT 5;
-
-
