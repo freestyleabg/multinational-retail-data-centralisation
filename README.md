@@ -83,7 +83,7 @@ Run the scripts individually to perform data extraction, cleaning, and database 
 
 ## Contributing
 
-Contributions to improve the project are welcome. Please read the contributing guide for details on our code of conduct, and the process for submitting pull requests.
+Contributions to improve the project are welcome. Please read the [contributing guide](https://github.com/freestyleabg/multinational-retail-data-centralisation319/wiki/Contribution-Guide) for details on our code of conduct, and the process for submitting pull requests.
 
 ## License
 
