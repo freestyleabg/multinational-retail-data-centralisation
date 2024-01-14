@@ -73,3 +73,5 @@ __pycache__
 
 # Trunk Checker
 .trunk
+
+api_key
