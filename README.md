@@ -52,6 +52,7 @@ This project employs a diverse range of technologies, ensuring robustness and ef
 ├── data_extraction.py    # Script for extracting data from various sources
 ├── data_cleaning.py      # Script for cleaning and standardizing data
 ├── database_utils.py     # Utilities for database operations
+├── main.py               # Central executable for running ETL workflows
 └── config/               # Configuration files and templates
     ├── db_creds_local.yaml
     ├── db_creds.yaml
@@ -77,9 +78,14 @@ cd multinational-retail-data-centralisation319
 pip install -r requirements.txt
 ```
 
-### Usage
+## Running the Project
 
-Run the scripts individually to perform data extraction, cleaning, and database operations.
+Execute `main.py` to initiate the ETL workflows. This script orchestrates the entire process of data extraction, transformation (cleaning and standardizing), and loading into the database.
+
+```bash
+python main.py
+```
+
 
 ## Contributing
 
